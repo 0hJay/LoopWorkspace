@@ -221,10 +221,12 @@ jobs:
           override_sens \
           now_line \
           watch_title \
+          2hlollipop \
           meal_days \
           profiles \
           basal_lock \
-          live_activity
+          negative_insulin \
+          remote_window 
 
       # Patch Fastlane Match to not print tables
       - name: Patch Match Tables
