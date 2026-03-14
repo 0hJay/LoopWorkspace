@@ -3,7 +3,7 @@
 //  PebbleService
 //
 //  Main interface for Pebble smartwatch integration
-//  Manages local API server and data updates
+//  Manages local API server, data updates, and command confirmation
 //
 
 import Foundation
@@ -12,13 +12,15 @@ import os.log
 
 /// Manages Pebble smartwatch integration for Loop
 /// Runs local HTTP server to expose CGM/pump data to Pebble via Bluetooth
+/// Supports bolus and carb commands with iOS confirmation
 public class PebbleManager {
     
     public static let shared = PebbleManager()
     
     private let log = OSLog(category: "PebbleManager")
     private let dataBridge = LoopDataBridge()
-    private lazy var apiServer = LocalAPIServer(dataBridge: dataBridge)
+    public let commandManager = PebbleCommandManager.shared
+    private lazy var apiServer = LocalAPIServer(dataBridge: dataBridge, commandManager: commandManager)
     
     private var isStarted = false
     
@@ -39,6 +41,7 @@ public class PebbleManager {
         isStarted = true
         
         log.info("Pebble integration started - API available at http://127.0.0.1:8080")
+        log.info(LocalAPIServer.apiDocumentation)
     }
     
     /// Stop Pebble integration
@@ -93,6 +96,26 @@ public class PebbleManager {
     public var apiDocs: String {
         return LocalAPIServer.apiDocumentation
     }
+    
+    // MARK: - Command Configuration
+    
+    /// Set maximum bolus allowed from Pebble
+    public var maxBolus: Double {
+        get { commandManager.maxBolus }
+        set { commandManager.maxBolus = newValue }
+    }
+    
+    /// Set maximum carbs allowed per entry from Pebble
+    public var maxCarbs: Double {
+        get { commandManager.maxCarbs }
+        set { commandManager.maxCarbs = newValue }
+    }
+    
+    /// Set delegate for command confirmation UI
+    public var confirmationDelegate: PebbleCommandConfirmationDelegate? {
+        get { commandManager.confirmationDelegate }
+        set { commandManager.confirmationDelegate = newValue }
+    }
 }
 
 // MARK: - Integration with LoopDataManager
@@ -102,8 +125,6 @@ extension PebbleManager {
     /// Connect to LoopDataManager and receive updates
     /// Call this from LoopDataManager when WatchContext updates
     public func connectToLoopData() {
-        // This will be called by LoopDataManager
-        // When WatchContext is updated, call updateContext()
         log.info("PebbleManager connected to Loop data")
     }
 }
