@@ -25,6 +25,13 @@ static SimpleMenuLayer *s_menu_layer;
 static SimpleMenuItem s_menu_items[3];
 static SimpleMenuSection s_menu_section;
 
+// Image resources
+static GBitmap *s_icon_bolus;
+static GBitmap *s_icon_carbs;
+static GBitmap *s_icon_alert;
+static GBitmap *s_icon_check;
+static GBitmap *s_icon_reject;
+
 // Bolus entry window
 static Window *s_bolus_window;
 static TextLayer *s_bolus_title_layer;
@@ -356,12 +363,18 @@ static void menu_window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
     
+    // Load icons
+    s_icon_bolus = gbitmap_create_with_resource(IMAGE_BOLUS);
+    s_icon_carbs = gbitmap_create_with_resource(IMAGE_CARBS);
+    
     s_menu_items[0] = (SimpleMenuItem){
         .title = "Request Bolus",
+        .icon = s_icon_bolus,
         .callback = menu_bolus_callback,
     };
     s_menu_items[1] = (SimpleMenuItem){
         .title = "Log Carbs",
+        .icon = s_icon_carbs,
         .callback = menu_carbs_callback,
     };
     
@@ -564,6 +577,13 @@ static void init(void) {
 }
 
 static void deinit(void) {
+    // Destroy bitmaps
+    gbitmap_destroy(s_icon_bolus);
+    gbitmap_destroy(s_icon_carbs);
+    gbitmap_destroy(s_icon_alert);
+    gbitmap_destroy(s_icon_check);
+    gbitmap_destroy(s_icon_reject);
+    
     window_destroy(s_main_window);
 }
 
