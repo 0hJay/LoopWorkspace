@@ -70,7 +70,7 @@ Select the "LoopWorkspace" scheme (not the "Loop" scheme) and Build, Run, or Tes
 
 ### Installing the Pebble Watch App
 
-#### Option 1: Using Pebble SDK (Recommended)
+#### Option 1: Using Build Script (Recommended)
 
 1. Install the Pebble SDK:
    ```bash
@@ -79,29 +79,76 @@ Select the "LoopWorkspace" scheme (not the "Loop" scheme) and Build, Run, or Tes
    
    # Linux
    pip install pebble-sdk
+   
+   # Or use Docker
+   docker run -v $PWD:/app rebble/pebble-sdk pebble build
    ```
 
-2. Build the watch app:
+2. Build and install:
+   ```bash
+   cd pebble/
+   
+   # Build only
+   ./build.sh
+   
+   # Build and install to phone
+   ./build.sh --install <phone-ip>
+   
+   # Build and install via Rebble cloud
+   ./build.sh --install
+   ```
+
+#### Option 2: Rebble Appstore (For Public Distribution)
+
+1. Build the app:
+   ```bash
+   cd pebble/
+   ./build.sh
+   ```
+
+2. Deploy to Rebble Appstore:
+   - Go to [Rebble Developer Portal](https://dev-portal.rebble.io/)
+   - Click "Add a Watchapp"
+   - Upload `loop-cgm.pbw`
+   - Add screenshots and description
+   - Publish!
+
+   See [Deployment Guide](Documentation/pebble-deployment.md) for detailed steps.
+
+#### Option 3: Direct SDK Build
+
+1. Build using Pebble SDK directly:
    ```bash
    cd pebble/
    pebble build
    ```
 
-3. Install on your Pebble:
+2. Install on your Pebble:
    ```bash
-   # Connect via Bluetooth to your phone first
+   # Via phone IP
    pebble install --phone <your-phone-ip>
    
-   # Or install via cloud (Rebble)
+   # Via Rebble cloud
    pebble install --cloudpebble
    ```
 
-#### Option 2: Using Rebble Developer Portal
+### Rebble iOS App Setup
 
-1. Go to [CloudPebble](https://cloudpebble.net/)
-2. Create new project "Loop CGM"
-3. Upload the `pebble/` directory contents
-4. Build and install directly to your watch
+The Loop CGM watchapp connects to your iPhone via the **Rebble app** (the community-maintained Pebble app):
+
+1. **Install Rebble app on iPhone:**
+   - Follow instructions at [rebble.io/howto](https://rebble.io/howto/)
+   - This replaces the original Pebble app
+
+2. **Pair your Pebble:**
+   - Open Rebble app
+   - Follow pairing instructions
+   - Ensure Bluetooth is connected
+
+3. **The watchapp communicates via:**
+   - Bluetooth connection to iPhone
+   - Local HTTP server in Loop app (localhost:8080)
+   - No internet required for data display
 
 ### Configuring the iOS App
 
