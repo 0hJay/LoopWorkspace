@@ -40,7 +40,7 @@ platform :ios do
     )
 
     previous_build_number = latest_testflight_build_number(
-      app_identifier: "com.#{TEAMID}.loopkit.Loop",
+      app_identifier: "com.#{TEAMID}.0hJay.Loop",
       api_key: api_key,
     )
 
@@ -216,12 +216,12 @@ platform :ios do
       verbose: true,
       git_basic_authorization: Base64.strict_encode64("#{GITHUB_REPOSITORY_OWNER}:#{GH_PAT}"),
       app_identifier: [
-        "com.#{TEAMID}.0hjay.Loop", 
-        "com.#{TEAMID}.0hjay.Loop.statuswidget", 
-        "com.#{TEAMID}.0hjay.Loop.LoopWatch.watchkitextension", 
-        "com.#{TEAMID}.0hjay.Loop.LoopWatch", 
-        "com.#{TEAMID}.0hjay.Loop.Loop-Intent-Extension",
-        "com.#{TEAMID}.0hjay.Loop.LoopWidgetExtension",
+        "com.#{TEAMID}.0hJay.Loop", 
+        "com.#{TEAMID}.0hJay.Loop.statuswidget", 
+        "com.#{TEAMID}.0hJay.Loop.LoopWatch.watchkitextension", 
+        "com.#{TEAMID}.0hJay.Loop.LoopWatch", 
+        "com.#{TEAMID}.0hJay.Loop.Loop-Intent-Extension",
+        "com.#{TEAMID}.0hJay.Loop.LoopWidgetExtension",
       ]
     )
   end
@@ -241,7 +241,7 @@ platform :ios do
       bundle_id = Spaceship::ConnectAPI::BundleId.find(identifier)
     end
 
-    find_bundle_id("com.#{TEAMID}.0hjay.Loop")
+    find_bundle_id("com.#{TEAMID}.0hJay.Loop")
 
     match(
       type: "appstore",
