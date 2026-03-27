@@ -11,19 +11,31 @@ import Foundation
 import LoopKit
 import HealthKit
 
-/// Lightweight HTTP server running on localhost:8080
+/// Lightweight HTTP server running on localhost (configurable port)
 /// Provides Loop data to Pebble watch app via Bluetooth connection
 public class LocalAPIServer {
     
     private var serverSocket: Int32 = -1
     private var isRunning = false
-    private let port: UInt16 = 8080
+    private let port: UInt16
     private let dataBridge: LoopDataBridge
     private let commandManager: PebbleCommandManager
     
-    public init(dataBridge: LoopDataBridge, commandManager: PebbleCommandManager = .shared) {
+    /// Default port for Pebble API (can be overridden)
+    public static let defaultPort: UInt16 = 8080
+    
+    /// Alternative ports if default is in use
+    public static let alternativePorts: [UInt16] = [8081, 8082, 8083, 8084, 8085]
+    
+    public init(dataBridge: LoopDataBridge, commandManager: PebbleCommandManager = .shared, port: UInt16 = Self.defaultPort) {
         self.dataBridge = dataBridge
         self.commandManager = commandManager
+        self.port = port
+    }
+    
+    /// Get the current port (for UI display)
+    public func getCurrentPort() -> UInt16 {
+        return port
     }
     
     deinit {

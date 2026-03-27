@@ -20,15 +20,34 @@ public class PebbleManager {
     private let log = OSLog(category: "PebbleManager")
     private let dataBridge = LoopDataBridge()
     public let commandManager = PebbleCommandManager.shared
-    private lazy var apiServer = LocalAPIServer(dataBridge: dataBridge, commandManager: commandManager)
+    private var apiServer: LocalAPIServer!
+    
+    // MARK: - Configuration
+    
+    /// API port for local HTTP server (default: 8080)
+    /// User-configurable via Settings UI
+    private var configuredPort: UInt16 = LocalAPIServer.defaultPort
+    
+    /// Persisted key for port configuration
+    private let portUserDefaultsKey = "PebbleAPIPort"
     
     private var isStarted = false
     
-    private init() {}
+    private init() {
+        // Load saved port from UserDefaults
+        if let savedPort = UserDefaults.standard.object(forKey: portUserDefaultsKey) as? UInt16 {
+            configuredPort = savedPort
+        }
+    }
+    
+    /// Initialize API server with configured port (lazy initialization)
+    private func initializeAPIServer() {
+        apiServer = LocalAPIServer(dataBridge: dataBridge, commandManager: commandManager, port: configuredPort)
+    }
     
     // MARK: - Public Interface
     
-    /// Start Pebble integration
+    /// Start Pebble integration with current port configuration
     /// Begins local HTTP server for off-grid communication
     public func start() {
         guard !isStarted else {
@@ -36,11 +55,16 @@ public class PebbleManager {
             return
         }
         
-        log.info("Starting Pebble integration")
+        // Initialize API server with configured port if not already done
+        if apiServer == nil {
+            initializeAPIServer()
+        }
+        
+        log.info("Starting Pebble integration on port \(configuredPort)")
         apiServer.start()
         isStarted = true
         
-        log.info("Pebble integration started - API available at http://127.0.0.1:8080")
+        log.info("Pebble integration started - API available at http://127.0.0.1:\(configuredPort)")
         log.info(LocalAPIServer.apiDocumentation)
     }
     
@@ -51,6 +75,14 @@ public class PebbleManager {
         log.info("Stopping Pebble integration")
         apiServer.stop()
         isStarted = false
+    }
+    
+    /// Restart Pebble integration (useful after port change)
+    public func restart() {
+        stop()
+        // Clear the API server so it reinitializes with new port
+        apiServer = nil
+        start()
     }
     
     /// Update data from WatchContext
@@ -115,6 +147,46 @@ public class PebbleManager {
     public var confirmationDelegate: PebbleCommandConfirmationDelegate? {
         get { commandManager.confirmationDelegate }
         set { commandManager.confirmationDelegate = newValue }
+    }
+    
+    // MARK: - Port Configuration
+    
+    /// Get current API port
+    public func getCurrentPort() -> UInt16 {
+        return configuredPort
+    }
+    
+    /// Set API port (requires restart to take effect)
+    /// - Parameters:
+    ///   - port: New port number (must be 1024-65535)
+    ///   - restartNow: If true, restarts server immediately; if false, applies on next start
+    public func setPort(_ port: UInt16, restartNow: Bool = false) -> Bool {
+        // Validate port range
+        guard port >= 1024 && port <= 65535 else {
+            log.error("Invalid port number: \(port). Must be between 1024 and 65535")
+            return false
+        }
+        
+        // Save to UserDefaults
+        UserDefaults.standard.set(port, forKey: portUserDefaultsKey)
+        
+        if port != configuredPort {
+            let oldPort = configuredPort
+            configuredPort = port
+            
+            log.info("Pebble API port changed from \(oldPort) to \(port)")
+            
+            if restartNow && isStarted {
+                restart()
+            }
+        }
+        
+        return true
+    }
+    
+    /// Get list of alternative ports for UI dropdown
+    public static func getAvailablePorts() -> [UInt16] {
+        return [LocalAPIServer.defaultPort] + LocalAPIServer.alternativePorts
     }
 }
 
