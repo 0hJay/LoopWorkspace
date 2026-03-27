@@ -118,7 +118,7 @@ platform :ios do
 
     gym(
       export_method: "app-store",
-      scheme: "LoopWorkspace",
+      scheme: "Loop",
       output_name: "Loop.ipa",
       configuration: "Release",
       destination: 'generic/platform=iOS',
